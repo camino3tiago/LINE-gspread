@@ -1,6 +1,5 @@
 # Herokuデプロイ用
 
-
 import pandas as pd
 from datetime import date, datetime
 import gspread  # pythonでspread sheetを操作するためのライブラリ
@@ -26,9 +25,8 @@ def auth():
     return worksheet
 
 
-
 # 日付
-def diary_date(date=None):
+def diary_date(date=date.today):
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
 
@@ -77,6 +75,7 @@ def day_log(text):
     worksheet.update([df.columns.values.tolist()]+df.values.tolist())
 
     print('感想の入力できました。')
+
 
 from flask import Flask, request, abort
 
