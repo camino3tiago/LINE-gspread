@@ -26,14 +26,18 @@ def auth():
 
 
 # 日付
-def diary_date(date=date.today):
+def diary_date(text):
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
 
-    if date is None:
-        timestamp = date.today()
-    else:
-        timestamp = datetime.strptime(date, '%Y%m%d').date()
+    if text.isdecimal():    
+        # YYYY/MM/DDのtextを一度、datetime型に変換するし、それから再度文字列型にする
+        x = datetime.strptime(text, '%Y%m%d').date()    # datetimeに変換できるか確認のため
+        timestamp = x.strftime('%Y/%m/%d')
+    else:    
+    # 今日の日付をstrタイプに変換する(YYYY/MM/DD)
+        timestamp = date.today().strftime('%Y/%m/%d')
+
     # dfに日付を入れる
     df = df.append({'日付': timestamp, '天気': '', '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
@@ -139,8 +143,8 @@ def handle_message(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=event.message.text))   # event.message.textは、送信されたテキスト
-
-    day_mood()
+    print(event.message.text)
+    diary_date()
     # # 日付
     # if len(event.message.text) == 8 and event.message.text.isdecimal():
     #     day_mood(event.message.text)
