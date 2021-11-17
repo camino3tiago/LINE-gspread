@@ -143,15 +143,20 @@ def handle_message(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=event.message.text))   # event.message.textは、送信されたテキスト
-    print(event.message.text)
-    diary_date()
+    
     # # 日付
-    # if len(event.message.text) == 8 and event.message.text.isdecimal():
-    #     day_mood(event.message.text)
-    #     line_bot_api.reply_message(
-    #         event.reply_token,
-    #         TextSendMessage(text='どんな1日でしたか')
-    #     )
+    if (len(event.message.text) == 8 and event.message.text.isdecimal()) or event.message.text == 'today':
+        diary_date(event.message.text)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='どんな1日でしたか')
+        )
+    else:
+        day_log(event.message.text)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='おうむするしか！！')
+        )
 
     # elif event.message.text in weather_list:  # 天気
     #     day_weather(event.message.text)
