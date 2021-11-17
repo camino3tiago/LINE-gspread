@@ -142,7 +142,7 @@ def handle_message(event):
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=datetime.now()))   # event.message.textは、送信されたテキスト
+        TextSendMessage(text='元気ですかー！？？'))   # event.message.textは、送信されたテキスト
     
     # # 日付
     if (len(event.message.text) == 8 and event.message.text.isdecimal()) or event.message.text == 'today':
