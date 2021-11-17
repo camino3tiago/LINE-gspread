@@ -136,33 +136,37 @@ def handle_message(event):
         TextSendMessage(text=event.message.text))   # event.message.textは、送信されたテキスト
     """
 
-    day_mood()
-    # 日付
-    if len(event.message.text) == 8 and event.message.text.isdecimal():
-        day_mood(event.message.text)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='どんな1日でしたか')
-        )
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=event.message.text))   # event.message.textは、送信されたテキスト
 
-    elif event.message.text in weather_list:  # 天気
-        day_weather(event.message.text)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f'{event.message.text}だったんですねー！')
-        )
-    elif event.message.text == 'mood':  # 気分
-        day_mood(event.message.text)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='そんな気分でしたか')
-        )
-    else:
-        day_log(event.message.text)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='お疲れ様でしたー！とりあえず明日も生きよう！！！')
-        )
+    day_mood()
+    # # 日付
+    # if len(event.message.text) == 8 and event.message.text.isdecimal():
+    #     day_mood(event.message.text)
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text='どんな1日でしたか')
+    #     )
+
+    # elif event.message.text in weather_list:  # 天気
+    #     day_weather(event.message.text)
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text=f'{event.message.text}だったんですねー！')
+    #     )
+    # elif event.message.text == 'mood':  # 気分
+    #     day_mood(event.message.text)
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text='そんな気分でしたか')
+    #     )
+    # else:
+    #     day_log(event.message.text)
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text='お疲れ様でしたー！とりあえず明日も生きよう！！！')
+    #     )
 
 if __name__ == "__main__":
     # 本番環境用

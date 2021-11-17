@@ -1,4 +1,5 @@
 # 開発環境用
+
 import pandas as pd
 from datetime import date
 import gspread  # pythonでspread sheetを操作するためのライブラリ
@@ -103,9 +104,26 @@ def callback():
 # リプライメッセージ
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=event.message.text))
+    # line_bot_api.reply_message(
+    #     event.reply_token,
+    #     TextSendMessage(text=event.message.text))
+
+    weather_list = ['晴れ', '曇り', '雨', '雪', '晴れ/曇り', '晴れ/雨', '曇り/雨', 'みぞれ']
+
+    if event.message.text == '今日':
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=event.message.text))
+    elif event.message.text in weather_list:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='天気情報です')
+        )
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='こんにちはーーー') 
+        )
 
 
 if __name__ == "__main__":
