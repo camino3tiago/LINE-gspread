@@ -1,4 +1,83 @@
 # Herokuデプロイ用
+
+
+import pandas as pd
+from datetime import date, datetime
+import gspread  # pythonでspread sheetを操作するためのライブラリ
+# oauth2clientは、Googleの各種APIにアクセスするためのライブラリ
+from oauth2client.service_account import ServiceAccountCredentials  # 認証情報関連
+
+def auth():
+    SP_CREDENTIAL_FILE = 'line-gspread-c4b007d26ebe.json'
+
+    # APIを使用する範囲の指定
+    SP_SCOPE = [
+        'https://spreadsheets.google.com/feeds',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    SP_SHEET_KEY = '1fWhJBRz9e2a9RmOYZ-HAQox5cMV9SLSvvVfaCTFlRTA'   # スプレッドシートのURL(~d/.../edit~の"..."部分)
+    SP_SHEET = 'diary'  # 記入するシート名
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(SP_CREDENTIAL_FILE, SP_SCOPE)    # 認証情報すり合わせ
+    gc = gspread.authorize(credentials) # 認証
+
+    worksheet = gc.open_by_key(SP_SHEET_KEY).worksheet(SP_SHEET)    # SP_SHEET_KEYのSP_SHEETの情報を開いて、データを持ってくる
+
+    return worksheet
+
+
+
+# 日付
+def diary_date(date=None):
+    worksheet = auth()
+    df = pd.DataFrame(worksheet.get_all_records())
+
+    if date is None:
+        timestamp = date.today()
+    else:
+        timestamp = datetime.strptime(date, '%Y%m%d').date()
+    # dfに日付を入れる
+    df = df.append({'日付': timestamp, '天気': '', '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+
+    # ワークシートを更新
+    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+
+    print('日付登録しました')
+
+
+def day_weather(text):
+    worksheet = auth()
+    df = pd.DataFrame(worksheet.get_all_records())
+
+    # dfに値を入れる(dfの値の取得は、iloc[row, column])
+    df.iloc[-1, 1] = text
+
+    # ワークシートを更新
+    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+
+    print('天気を登録しました')
+
+def day_mood(text):
+    worksheet = auth()
+    df = pd.DataFrame(worksheet.get_all_records())
+
+    # dfに値を入れる(dfの値の取得は、iloc[row, column])
+    df.iloc[-1, 2] = text
+
+    # ワークシートを更新
+    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+
+    print('気分を登録しました')
+
+def day_log(text):
+    worksheet = auth()
+    df = pd.DataFrame(worksheet.get_all_records())
+
+    df.iloc[-1, 3] = text
+    worksheet.update([df.columns.values.tolist()]+df.values.tolist())
+
+    print('感想の入力できました。')
+
 from flask import Flask, request, abort
 
 from linebot import (LineBotApi, WebhookHandler)
@@ -22,6 +101,11 @@ def hello_world():
     return 'Hello World'
 
 
+"""
+# メッセージが送られたら、実行される
+    webhookURLに、"herokuアプリのURL/callback" を紐付けしたため、
+    メッセージが送られたら、このwebhookURLが呼ばれる = callback関数が実行される
+"""
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -40,14 +124,46 @@ def callback():
 
     return 'OK'
 
+weather_list = ['晴れ', '曇り', '雨', '雪', '晴れ/曇り', '晴れ/雨', '曇り/雨', 'みぞれ']
+mood_list = ['😀', '😄', '😆', '😅', '😓', '😢', '😩', '😱', '😡', '😏', '😴', '😁', '😷', '🤗',]
 
 # リプライメッセージ
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    """
+    # おうむ返しする(返答内容は、event.message.textの部分で指定)
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        TextSendMessage(text=event.message.text))   # event.message.textは、送信されたテキスト
+    """
 
+    day_mood()
+    # 日付
+    if len(event.message.text) == 8 and event.message.text.isdecimal():
+        day_mood(event.message.text)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='どんな1日でしたか')
+        )
+
+    elif event.message.text in weather_list:  # 天気
+        day_weather(event.message.text)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f'{event.message.text}だったんですねー！')
+        )
+    elif event.message.text == 'mood':  # 気分
+        day_mood(event.message.text)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='そんな気分でしたか')
+        )
+    else:
+        day_log(event.message.text)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='お疲れ様でしたー！とりあえず明日も生きよう！！！')
+        )
 
 if __name__ == "__main__":
     # 本番環境用
