@@ -150,7 +150,7 @@ def handle_message(event):
 
     text = event.message.text
  
-    t = text.splitlines()
+    t = text.split('\n')
 
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
