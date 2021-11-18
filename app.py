@@ -149,14 +149,14 @@ def handle_message(event):
     """
 
     text = event.message.text
-    t = text.splitlines()
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=f'textの出力です\n{text}'))
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=t)
-    )    
+    # t = text.splitlines()
+    # line_bot_api.reply_message(
+    #     event.reply_token,
+    #     TextSendMessage(text=f'textの出力です\n{text}'))
+    # line_bot_api.reply_message(
+    #     event.reply_token,
+    #     TextSendMessage(text=t)
+    # )    
 
     try:
         t = text.splitlines()
