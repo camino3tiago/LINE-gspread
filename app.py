@@ -90,12 +90,8 @@ def handle_message(event):
     try:
         t = text.splitlines()
 
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f'{len(t)}こに分かれます\n{t}')
-        )
         if len(t) == 3:
-
+            from datetime import datetime, date
             d = date.today().strftime("%Y/%m/%d")
             w = t[0]
             m = t[1]
