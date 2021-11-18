@@ -175,7 +175,11 @@ def handle_message(event):
 
                 # ワークシートを更新
                 worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
-
+                
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
+                
         else:
             line_bot_api.reply_message(
                 event.reply_token,
