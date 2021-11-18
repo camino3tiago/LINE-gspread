@@ -16,7 +16,7 @@ def auth():
                 "type": "service_account",
                 "project_id": os.environ['SHEET_PROJECT_ID'],
                 "private_key_id": os.environ['SHEET_PRIVATE_KEY_ID'],
-                "private_key": os.environ['SHEET_PRIVATE_KEY'],
+                "private_key": os.environ['SHEET_PRIVATE_KEY'].replace('\\n', '\n'),
                 "client_email": os.environ['SHEET_CLIENT_EMAIL'],
                 "client_id": os.environ['SHEET_CLIENT_ID'],
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -98,7 +98,7 @@ def handle_message(event):
 
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'{auth()}: worksheetが読み込めないの？\n\n{len(t)}こに分かれます\n天気:{w}\n日時:{d}, mood: {m}\nどんな日でしたか\n{l}')
+                TextSendMessage(text=f'worksheetが読み込めないの？\n\n{len(t)}こに分かれます\n天気:{w}\n日時:{d}, mood: {m}\nどんな日でしたか\n{l}')
             )
 
             # 日付が正しいとわかったら、ワークシートに記入する
