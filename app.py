@@ -151,12 +151,12 @@ def handle_message(event):
     text = event.message.text
     if text[:2] == '天気':
 
-        worksheet = auth()
-        df = pd.DataFrame(worksheet.get_all_records())
-        df = df.append({'日付': date.today(), '天気': text[3:], '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+        # worksheet = auth()
+        # df = pd.DataFrame(worksheet.get_all_records())
+        # df = df.append({'日付': date.today(), '天気': text[3:], '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
-        # ワークシートを更新
-        worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+        # # ワークシートを更新
+        # worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
         
         line_bot_api.reply_message(
             event.reply_token,
