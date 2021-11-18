@@ -25,18 +25,17 @@ def auth():
     return worksheet
 
 
+"""
 # 日付
-def diary_date(text):
+def diary_date(d):
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
-
-    if text.isdecimal():    
-        # YYYY/MM/DDのtextを一度、datetime型に変換するし、それから再度文字列型にする
-        x = datetime.strptime(text, '%Y%m%d').date()    # datetimeに変換できるか確認のため
+    
+    if d.isdecimal() and len(d) == 8:
+        x = datetime.strptime(d, '%Y%m%d').date() 
         timestamp = x.strftime('%Y/%m/%d')
-    else:    
-    # 今日の日付をstrタイプに変換する(YYYY/MM/DD)
-        timestamp = date.today().strftime('%Y/%m/%d')
+    else:
+        timestamp = date.today().strftime("%Y/%m/%d")
 
     # dfに日付を入れる
     df = df.append({'日付': timestamp, '天気': '', '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
@@ -46,40 +45,52 @@ def diary_date(text):
 
     print('日付登録しました')
 
-
-def day_weather(text):
+weather = input('天気は？：')
+def day_weather(weather):
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
 
     # dfに値を入れる(dfの値の取得は、iloc[row, column])
-    df.iloc[-1, 1] = text
+    df.iloc[-1, 1] = weather
 
     # ワークシートを更新
     worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
 
     print('天気を登録しました')
 
-def day_mood(text):
+mood = input('気分は？：')
+def day_mood(mood):
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
 
     # dfに値を入れる(dfの値の取得は、iloc[row, column])
-    df.iloc[-1, 2] = text
+    df.iloc[-1, 2] = mood
 
     # ワークシートを更新
     worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
 
     print('気分を登録しました')
 
+
+text = input('どんな日？：')
 def day_log(text):
     worksheet = auth()
     df = pd.DataFrame(worksheet.get_all_records())
 
+    # dfに値を入れる(dfの値の取得は、iloc[row, column])
     df.iloc[-1, 3] = text
-    worksheet.update([df.columns.values.tolist()]+df.values.tolist())
 
-    print('感想の入力できました。')
+    # ワークシートを更新
+    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
 
+    print('お疲れ様でした')
+
+# diary_date(d)
+# day_weather(weather)
+# day_mood(mood)
+# day_log(text)
+
+"""
 
 from flask import Flask, request, abort
 
@@ -127,9 +138,6 @@ def callback():
 
     return 'OK'
 
-weather_list = ['晴れ', '曇り', '雨', '雪', '晴れ/曇り', '晴れ/雨', '曇り/雨', 'みぞれ']
-mood_list = ['😀', '😄', '😆', '😅', '😓', '😢', '😩', '😱', '😡', '😏', '😴', '😁', '😷', '🤗',]
-
 # リプライメッセージ
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
@@ -140,23 +148,58 @@ def handle_message(event):
         TextSendMessage(text=event.message.text))   # event.message.textは、送信されたテキスト
     """
 
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text='元気ですかー！？？'))   # event.message.textは、送信されたテキスト
-    
-    # # 日付
-    if (len(event.message.text) == 8 and event.message.text.isdecimal()) or event.message.text == 'today':
-        diary_date(event.message.text)
+    text = event.message.text
+    try:
+        t = text.split('\\n')
+
+        if len(t) == 4:
+            d = t[0]
+            if len(d) == 8 and d.isdecimal():
+                try:    
+                    from datetime import date, datetime
+                    x = datetime.strptime(d, '%Y%m%d').date()
+                    d = x.strftime('%Y/%m/%d')
+                except:
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text='日付は、YYYYMMDDの８桁で入力してください。'))   # event.message.textは、送信されたテキスト
+                
+                w = t[1]
+                m = t[2]
+                l = t[3]
+
+                # 日付が正しいとわかったら、ワークシートに記入する
+                worksheet = auth()
+                df = pd.DataFrame(worksheet.get_all_records())
+                df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+
+                # ワークシートを更新
+                worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='日付(YYYYMMDD)\n天気\n\気分n\どんな日だったかn\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
+                
+    except:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text='どんな1日でしたか')
-        )
-    else:
-        day_log(event.message.text)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='おうむするしか！！')
-        )
+            TextSendMessage(text='日付(YYYYMMDD)\n天気\n\気分n\どんな日だったかn\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
+        
+
+    # # # 日付
+    # if (len(event.message.text) == 8 and event.message.text.isdecimal()) or event.message.text == 'today':
+    #     diary_date(event.message.text)
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text='どんな1日でしたか')
+    #     )
+    # else:
+    #     day_log(event.message.text)
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text='おうむするしか！！')
+    #     )
 
     # elif event.message.text in weather_list:  # 天気
     #     day_weather(event.message.text)
