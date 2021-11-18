@@ -5,9 +5,26 @@ from datetime import date, datetime
 import gspread  # pythonでspread sheetを操作するためのライブラリ
 # oauth2clientは、Googleの各種APIにアクセスするためのライブラリ
 from oauth2client.service_account import ServiceAccountCredentials  # 認証情報関連
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 def auth():
     SP_CREDENTIAL_FILE = 'line-gspread-c4b007d26ebe.json'
+
+    SP_CREDENTIAL_FILE = {
+                "type": "service_account",
+                "project_id": os.getenv['SHEET_PROJECT_ID'],
+                "private_key_id": os.getenv['SHEET_PRIVATE_KEY_ID'],
+                "private_key": os.getenv['SHEET_PRIVATE_KEY'],
+                "client_email": os.getenv['SHEET_CLIENT_EMAIL'],
+                "client_id": os.getenv['SHEET_CLIENT_ID'],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url":  os.getenv['SHEET_CLIENT_X509_CERT_URL']
+             }
 
     # APIを使用する範囲の指定
     SP_SCOPE = [
@@ -100,10 +117,6 @@ from linebot.models import (MessageEvent, TextMessage, TextSendMessage,)
 
 app = Flask(__name__)
 
-from dotenv import load_dotenv
-load_dotenv()
-
-import os
 CHANNEL_ACCESS_TOKEN = os.getenv('LINE_GSPREAD_CHANNEL_ACCESS_TOKEN')
 CHANNEL_SECRET = os.getenv('LINE_GSPREAD_CHANNEL_SECRET')
 
