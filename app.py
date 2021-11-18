@@ -90,29 +90,33 @@ def handle_message(event):
         t = text.splitlines()
         if len(t) == 4:
             d = t[0]    
-            if len(d) == 8 and d.isdecimal():
-                try:    
-                    x = datetime.strptime(d, '%Y%m%d').date()
-                    d = x.strftime('%Y/%m/%d')
+            # if len(d) == 8 and d.isdecimal():
+            try:    
+                x = datetime.strptime(d, '%Y%m%d').date()
+                d = x.strftime('%Y/%m/%d')
 
-                    w = t[1]
-                    m = t[2]
-                    l = t[3]
+                w = t[1]
+                m = t[2]
+                l = t[3]
 
-                    # 日付が正しいとわかったら、ワークシートに記入する
-                    worksheet = auth()
-                    df = pd.DataFrame(worksheet.get_all_records())
-                    df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+                # 日付が正しいとわかったら、ワークシートに記入する
+                worksheet = auth()
+                df = pd.DataFrame(worksheet.get_all_records())
+                df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
-                    # ワークシートを更新
-                    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+                # ワークシートを更新
+                worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
 
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text='お疲れ様でした。明日もとりあえず生きよう！！')
+                )                    
 
-                except:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text='日付は、YYYYMMDDの８桁で入力してください。')
-                    )
+            except:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text='日付は、YYYYMMDDの８桁で入力してください。')
+                )
 
         # 4行でなければ
         else:
