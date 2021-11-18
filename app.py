@@ -40,7 +40,6 @@ def auth():
 
     return worksheet
 
-
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
@@ -97,13 +96,13 @@ def handle_message(event):
             m = t[1]
             l = t[2]
 
-            # 日付が正しいとわかったら、ワークシートに記入する
-            worksheet = auth()
-
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'{worksheet}: worksheetが読み込めないの？\n\n{len(t)}こに分かれます\n天気:{w}\n日時:{d}, mood: {m}\nどんな日でしたか\n{l}')
+                TextSendMessage(text=f'{auth()}: worksheetが読み込めないの？\n\n{len(t)}こに分かれます\n天気:{w}\n日時:{d}, mood: {m}\nどんな日でしたか\n{l}')
             )
+
+            # 日付が正しいとわかったら、ワークシートに記入する
+            worksheet = auth()
 
             df = pd.DataFrame(worksheet.get_all_records())
             df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
