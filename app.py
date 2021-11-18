@@ -150,7 +150,7 @@ def handle_message(event):
 
     text = event.message.text
     try:
-        t = text.split('\\n')
+        t = text.split('\n')
 
         if len(t) == 4:
             d = t[0]
@@ -183,12 +183,12 @@ def handle_message(event):
         else:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text='日付(YYYYMMDD)\n天気\n\気分n\どんな日だったかn\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
+                TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
                 
     except:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text='日付(YYYYMMDD)\n天気\n\気分n\どんな日だったかn\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
+            TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
         
 
     # # # 日付
