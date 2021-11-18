@@ -6,8 +6,24 @@ import gspread  # pythonでspread sheetを操作するためのライブラリ
 # oauth2clientは、Googleの各種APIにアクセスするためのライブラリ
 from oauth2client.service_account import ServiceAccountCredentials  # 認証情報関連
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 def auth():
-    SP_CREDENTIAL_FILE = 'line-gspread-c4b007d26ebe.json'
+
+    SP_CREDENTIAL_FILE = {
+                "type": "service_account",
+                "project_id": os.environ['SHEET_PROJECT_ID'],
+                "private_key_id": os.environ['SHEET_PRIVATE_KEY_ID'],
+                "private_key": os.environ['SHEET_PRIVATE_KEY'],
+                "client_email": os.environ['SHEET_CLIENT_EMAIL'],
+                "client_id": os.environ['SHEET_CLIENT_ID'],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url":  os.environ['SHEET_CLIENT_X509_CERT_URL']
+    }
 
     # APIを使用する範囲の指定
     SP_SCOPE = [
@@ -17,7 +33,7 @@ def auth():
     SP_SHEET_KEY = '1fWhJBRz9e2a9RmOYZ-HAQox5cMV9SLSvvVfaCTFlRTA'   # スプレッドシートのURL(~d/.../edit~の"..."部分)
     SP_SHEET = 'diary'  # 記入するシート名
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(SP_CREDENTIAL_FILE, SP_SCOPE)    # 認証情報すり合わせ
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(SP_CREDENTIAL_FILE, SP_SCOPE)    # 認証情報すり合わせ
     gc = gspread.authorize(credentials) # 認証
 
     worksheet = gc.open_by_key(SP_SHEET_KEY).worksheet(SP_SHEET)    # SP_SHEET_KEYのSP_SHEETの情報を開いて、データを持ってくる
@@ -100,32 +116,42 @@ day_log(text)
 
 """
 
-text = input('ご記入ください。').split('\\n')
+# text = 'あいう'
+text = """20200113
+晴れ
+元気
+昨日のオモウマい店めっちゃ面白かったー。夢の中へ素晴らしい！！！"""
+try:
+    t = text.split('\n')
 
-if len(text) == 4:
-    d = text[0]
-    if len(d) == 8 and d.isdecimal():
-        try:    
-            from datetime import date, datetime
-            x = datetime.strptime(d, '%Y%m%d').date()
-            d = x.strftime('%Y/%m/%d')
-        except:
-            print('日付は、YYYYMMDDの８桁で入力してください。')
+    timestamp = date.today().strftime("%Y/%m/%d")
 
-        w = text[1]
-        m = text[2]
-        l = text[3]
+    if len(t) == 4:
+        d = t[0]
+        if len(d) == 8 and d.isdecimal():
+            try:    
+                from datetime import date, datetime
+                x = datetime.strptime(d, '%Y%m%d').date()
+                d = x.strftime('%Y/%m/%d')
+            except:
+                print('日付は、YYYYMMDDの８桁で入力してください。')
 
-        # 日付が正しいとわかったら、ワークシートに記入する
-        worksheet = auth()
-        df = pd.DataFrame(worksheet.get_all_records())
-        df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+            w = t[1]
+            m = t[2]
+            l = t[3]
 
-        # ワークシートを更新
-        worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+            # 日付が正しいとわかったら、ワークシートに記入する
+            worksheet = auth()
+            df = pd.DataFrame(worksheet.get_all_records())
+            df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
-else:
-    print('日付(YYYYMMDD)\n天気\n\気分n\どんな日だったかn\nを例のように改行して記入してください。')
+            # ワークシートを更新
+            worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+
+    else:
+        print('日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを↑のように改行して記入してください。')
+except:
+    print('日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを↑のように改行して記入してください。')
 
 """
 
