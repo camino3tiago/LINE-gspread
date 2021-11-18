@@ -161,22 +161,23 @@ def handle_message(event):
     """
 
     text = event.message.text
-    timestamp = date.today().strftime("%Y/%m/%d")
 
-    try:
+    try:    # 受信したテキストを分割する
         t = text.split('\n')
-        
-        timestamp = date.today().strftime("%Y/%m/%d")
 
+        # 4行で来ていれば、spread sheetに書き込み準備
         if len(t) == 4:
-            d = t[0]
+            d = t[0]    
             if len(d) == 8 and d.isdecimal():
                 try:    
                     from datetime import date, datetime
                     x = datetime.strptime(d, '%Y%m%d').date()
                     d = x.strftime('%Y/%m/%d')
                 except:
-                    print('日付は、YYYYMMDDの８桁で入力してください。')
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text='日付は、YYYYMMDDの８桁で入力してください。')
+                    )
 
                 w = t[1]
                 m = t[2]
@@ -190,10 +191,17 @@ def handle_message(event):
                 # ワークシートを更新
                 worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
 
+        # 4行でなければ
         else:
-            print('日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを↑のように改行して記入してください。')
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを↑のように改行して記入してください。')
+            )
     except:
-        print('日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを↑のように改行して記入してください。')
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを↑のように改行して記入してください。')
+        )
 
     # # # 日付
     # if (len(event.message.text) == 8 and event.message.text.isdecimal()) or event.message.text == 'today':
