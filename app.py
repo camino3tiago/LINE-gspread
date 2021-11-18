@@ -149,20 +149,23 @@ def handle_message(event):
     """
 
     text = event.message.text
- 
-    t = text.split('\n')
+    if text[:2] == '天気':
 
-    worksheet = auth()
-    df = pd.DataFrame(worksheet.get_all_records())
-    df = df.append({'日付': t[0], '天気': t[1], '気分': t[2], '出来事': t[3]}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+        worksheet = auth()
+        df = pd.DataFrame(worksheet.get_all_records())
+        df = df.append({'日付': date.today(), '天気': text[3:], '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
-    # ワークシートを更新
-    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
-    
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
-
+        # ワークシートを更新
+        worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+        
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='天気 晴れ\nのように入力してください')
+        )
 
     # try:
     #     t = text.splitlines()
