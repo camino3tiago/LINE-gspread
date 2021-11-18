@@ -149,14 +149,20 @@ def handle_message(event):
     """
 
     text = event.message.text
-    # t = text.splitlines()
-    # line_bot_api.reply_message(
-    #     event.reply_token,
-    #     TextSendMessage(text=f'textの出力です\n{text}'))
-    # line_bot_api.reply_message(
-    #     event.reply_token,
-    #     TextSendMessage(text=t)
-    # )    
+ 
+    t = text.splitlines()
+
+    worksheet = auth()
+    df = pd.DataFrame(worksheet.get_all_records())
+    df = df.append({'日付': t[0], '天気': t[1], '気分': t[2], '出来事': t[3]}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+
+    # ワークシートを更新
+    worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+    
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
+
 
     try:
         t = text.splitlines()
