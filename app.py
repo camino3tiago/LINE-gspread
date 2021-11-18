@@ -99,13 +99,15 @@ def handle_message(event):
 
             # 日付が正しいとわかったら、ワークシートに記入する
             worksheet = auth()
-            df = pd.DataFrame(worksheet.get_all_records())
-            df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f'DF:{df}\n\n{len(t)}こに分かれます\n天気:{w}\n日時:{d}, mood: {m}\nどんな日でしたか\n{l}')
+                TextSendMessage(text=f'{worksheet}: worksheetが読み込めないの？\n\n{len(t)}こに分かれます\n天気:{w}\n日時:{d}, mood: {m}\nどんな日でしたか\n{l}')
             )
+
+            df = pd.DataFrame(worksheet.get_all_records())
+            df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+
             # ワークシートを更新
             worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
 
