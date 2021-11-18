@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def auth():
-    SP_CREDENTIAL_FILE = 'line-gspread-c4b007d26ebe.json'
 
     SP_CREDENTIAL_FILE = {
                 "type": "service_account",
@@ -162,64 +161,64 @@ def handle_message(event):
     """
 
     text = event.message.text
-    if text[:2] == '天気':
+    # if text[:2] == '天気':
 
-        worksheet = auth()
-        df = pd.DataFrame(worksheet.get_all_records())
-        df = df.append({'日付': date.today(), '天気': text[3:], '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+    #     worksheet = auth()
+    #     df = pd.DataFrame(worksheet.get_all_records())
+    #     df = df.append({'日付': date.today(), '天気': text[3:], '気分': '', '出来事': ''}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
 
-        # ワークシートを更新
-        worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+    #     # ワークシートを更新
+    #     worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
         
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='天気 晴れ\nのように入力してください')
-        )
-
-    # try:
-    #     t = text.splitlines()
-
-    #     if len(t) == 4:
-    #         d = t[0]
-    #         if len(d) == 8 and d.isdecimal():
-    #             try:    
-    #                 from datetime import date, datetime
-    #                 x = datetime.strptime(d, '%Y%m%d').date()
-    #                 d = x.strftime('%Y/%m/%d')
-    #             except:
-    #                 line_bot_api.reply_message(
-    #                     event.reply_token,
-    #                     TextSendMessage(text='日付は、YYYYMMDDの８桁で入力してください。'))   # event.message.textは、送信されたテキスト
-                
-    #             w = t[1]
-    #             m = t[2]
-    #             l = t[3]
-
-    #             # 日付が正しいとわかったら、ワークシートに記入する
-    #             worksheet = auth()
-    #             df = pd.DataFrame(worksheet.get_all_records())
-    #             df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
-
-    #             # ワークシートを更新
-    #             worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
-                
-    #             line_bot_api.reply_message(
-    #                 event.reply_token,
-    #                 TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
-                
-    #     else:
-    #         line_bot_api.reply_message(
-    #             event.reply_token,
-    #             TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
-                
-    # except:
     #     line_bot_api.reply_message(
     #         event.reply_token,
-    #         TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
+    #         TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
+    # else:
+    #     line_bot_api.reply_message(
+    #         event.reply_token,
+    #         TextSendMessage(text='天気 晴れ\nのように入力してください')
+    #     )
+
+    try:
+        t = text.splitlines()
+
+        if len(t) == 4:
+            d = t[0]
+            if len(d) == 8 and d.isdecimal():
+                try:    
+                    from datetime import date, datetime
+                    x = datetime.strptime(d, '%Y%m%d').date()
+                    d = x.strftime('%Y/%m/%d')
+                except:
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(text='日付は、YYYYMMDDの８桁で入力してください。'))   # event.message.textは、送信されたテキスト
+                
+                w = t[1]
+                m = t[2]
+                l = t[3]
+
+                # 日付が正しいとわかったら、ワークシートに記入する
+                worksheet = auth()
+                df = pd.DataFrame(worksheet.get_all_records())
+                df = df.append({'日付': d, '天気': w, '気分': m, '出来事': l}, ignore_index=True)   # ignore_index: append時に要素番号を新たに振りなおしてくれる
+
+                # ワークシートを更新
+                worksheet.update([df.columns.values.tolist()]+df.values.tolist())  # worksheetを更新(上のcl+vの情報を上書き)
+                
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text='お疲れ様でした。明日もとりあえず生きていきましょう！！'))   # event.message.textは、送信されたテキスト
+                
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
+                
+    except:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='日付(YYYYMMDD)\n天気\n気分\nどんな日だったか\n\nを例のように改行して記入してください。'))   # event.message.textは、送信されたテキスト
         
 
     # # # 日付
